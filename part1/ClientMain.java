@@ -8,6 +8,8 @@ public class ClientMain {
     public static final short STEP = 1;
     public static final int HEADER_SIZE = 12;
     public static final short SID_NUM = 947;
+
+    public static TCPConnect tcp;
     
     public static void main (String[] args) throws SocketException, UnknownHostException, IOException {
         // Stage A
@@ -23,7 +25,16 @@ public class ClientMain {
         System.out.println(Arrays.toString(bResponsePacket));
 
         // Stage C
+        byte[] cResponsePacket = stageC(bResponsePacket);
+        // TODO: Remove later
+        System.out.println("Done with stage C");
+        System.out.println(Arrays.toString(cResponsePacket));
+
         // Stage D
+        byte[] dResponsePacket = stageD(cResponsePacket);
+        // TODO: Remove later
+        System.out.println("Done with stage D");
+        System.out.println(Arrays.toString(dResponsePacket));
     }
 
     // Create the header for the packets
@@ -94,13 +105,53 @@ public class ClientMain {
                 ackedPacket = udp.receive(HEADER_SIZE + 4);
             }
         }
-        
+
         // TODO: remove this later
         System.out.println(secretA);
 
         byte[] response = udp.receive(HEADER_SIZE + 16);
         // Close the UDP socket
         udp.close();
+
+        return response;
+    }
+
+    //
+    public static byte[] stageC(byte[] packet) throws UnknownHostException, IOException  {
+        ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
+        packetBuf.put(packet);
+
+        int tcpPort = packetBuf.getInt(12);
+        int secretB = packetBuf.getInt(16);
+        
+        tcp = new TCPConnect(tcpPort);
+        byte[] response = tcp.receive(HEADER_SIZE + 13);
+
+        return response;
+    }
+
+    //
+    public static byte[] stageD(byte[] packet) throws IOException {
+        ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
+        packetBuf.put(packet);
+
+        int numPackets = packetBuf.getInt(12);
+        int length = packetBuf.getInt(16);
+        int secretC = packetBuf.getInt(20);
+        byte c = packetBuf.get(24);
+        byte[] header = createHeader(length, secretC);
+        byte[] payload = new byte[length]; 
+        for (int i = 0; i < payload.length; i++) {
+            payload[i] = c;
+        }
+
+        byte[] dataPacket = mergeHeaderPayload(header, payload);
+        for (int i = 0; i < numPackets; i++) {
+            tcp.send(dataPacket);
+        }
+        
+        byte[] response = tcp.receive(HEADER_SIZE + 4);
+        tcp.close();
 
         return response;
     }
