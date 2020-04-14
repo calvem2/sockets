@@ -4,3 +4,5 @@ Megan Calverley:
 Server secrets:
 
 How to compile our code:
+javac ClientMain.java
+java ClientMain
