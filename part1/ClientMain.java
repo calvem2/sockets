@@ -14,24 +14,28 @@ public class ClientMain {
     public static void main (String[] args) throws SocketException, UnknownHostException, IOException {
         // Stage A
         byte[] aResponsePacket = stageA();
+        
         // TODO: Remove later
         System.out.println("Done with stage A");
         System.out.println(Arrays.toString(aResponsePacket));
         
         // Stage B
         byte[] bResponsePacket = stageB(aResponsePacket);
+        
         // TODO: Remove later
         System.out.println("Done with stage B");
         System.out.println(Arrays.toString(bResponsePacket));
 
         // Stage C
         byte[] cResponsePacket = stageC(bResponsePacket);
+        
         // TODO: Remove later
         System.out.println("Done with stage C");
         System.out.println(Arrays.toString(cResponsePacket));
 
         // Stage D
         byte[] dResponsePacket = stageD(cResponsePacket);
+        
         // TODO: Remove later
         System.out.println("Done with stage D");
         System.out.println(Arrays.toString(dResponsePacket));
@@ -83,23 +87,33 @@ public class ClientMain {
 
     // Does the client side stage B
     public static byte[] stageB(byte[] packet) throws UnknownHostException, IOException {
+        // Creates the byte buffer from the packet received
+        // from the server from stage A
         ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
         packetBuf.put(packet);
 
+        // Extracts the information from the server packet
         int numPackets = packetBuf.getInt(12);
         int length = packetBuf.getInt(16);
         int udp_port = packetBuf.getInt(20);
         int secretA = packetBuf.getInt(24);
+        // Create a new udp connection
         UDPConnect udp = new UDPConnect(udp_port, 500);
+        // Create the header for the packets
         byte[] header = createHeader(length + 4, secretA);
 
-        //
+        // Transmit the number of UDP packets that the 
+        // server specifies
         for (int i = 0; i < numPackets; i++) {
+            // Create the payload for the given packet
             ByteBuffer payload = ByteBuffer.allocate(length + 4);
             payload.putInt(i);
+            // Merge the header and packet
             byte[] dataPacket = mergeHeaderPayload(header, payload.array());
 
             byte[] ackedPacket = null;
+            // Send the packet until the correct corresponding 
+            // ack packet has been received from the server
             while (ackedPacket == null || ByteBuffer.wrap(ackedPacket).getInt(12) != i) {
                 udp.send(dataPacket);
                 ackedPacket = udp.receive(HEADER_SIZE + 4);
@@ -116,40 +130,49 @@ public class ClientMain {
         return response;
     }
 
-    //
+    // Does the client side stage C
     public static byte[] stageC(byte[] packet) throws UnknownHostException, IOException  {
+        // Creates a byte buffer from the packet received
+        // from the server in stage B
         ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
         packetBuf.put(packet);
-
+        // Get the information from the server packet
         int tcpPort = packetBuf.getInt(12);
         int secretB = packetBuf.getInt(16);
-        
+        // Connect to the TCP port received from
+        // the server
         tcp = new TCPConnect(tcpPort);
+        // Receive the packet from the server
         byte[] response = tcp.receive(HEADER_SIZE + 13);
 
         return response;
     }
 
-    //
+    // Does the client side stage D
     public static byte[] stageD(byte[] packet) throws IOException {
+        // Creates a byte buffer from the packet received
+        // from the server in stage C
         ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
         packetBuf.put(packet);
-
+        // Get the information from the server packet
         int numPackets = packetBuf.getInt(12);
         int length = packetBuf.getInt(16);
         int secretC = packetBuf.getInt(20);
         byte c = packetBuf.get(24);
+        // Create the header
         byte[] header = createHeader(length, secretC);
+        // Create the payload for the packet
         byte[] payload = new byte[length]; 
         for (int i = 0; i < payload.length; i++) {
             payload[i] = c;
         }
-
+        // Merge the header and payload into one packet
         byte[] dataPacket = mergeHeaderPayload(header, payload);
+        // Send the number of packets specified by the server
         for (int i = 0; i < numPackets; i++) {
             tcp.send(dataPacket);
         }
-        
+        // Receive the packet from the server
         byte[] response = tcp.receive(HEADER_SIZE + 4);
         tcp.close();
 
