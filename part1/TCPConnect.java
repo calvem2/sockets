@@ -25,10 +25,6 @@ public class TCPConnect {
         InputStream is = tcp.getInputStream();
         int bytesRead = 0;
         while (bytesRead < length) {
-            // TODO: include this later?
-            //if () {
-            //
-            //}
             bytesRead += is.read(buf, bytesRead, (length - bytesRead));
         }
 
