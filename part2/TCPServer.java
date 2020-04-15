@@ -2,9 +2,7 @@ import java.nio.*;
 import java.net.*;
 import java.io.*;
 
-public class TCPServer {
-    private static final String SERVER = "attu2.cs.washington.edu";
-    
+public class TCPServer {    
     private ServerSocket tcp;
     private Socket socket;
 //    private int port;

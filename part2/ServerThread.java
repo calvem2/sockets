@@ -22,17 +22,25 @@ public class ServerThread extends Thread {
 
     public void run() {
         try {
+            // TODO: Remove this later
+            System.out.println("Done with stage A");
             // Stage B
             boolean stageB = stageB();
             udp.close();
+            // TODO: Remove this later
+            System.out.println("Done with stage B");
 
             if (stageB) {
                 // Stage C
                 if (tcp.accept() != null) {
                     stageC();
+                    // TODO: Remove this later
+                    System.out.println("Done with stage C");
                 }
                 // Stage D
                 stageD();
+                // TODO: Remove this later
+                System.out.println("Done with stage D");
                 tcp.close();
             }
 
@@ -107,7 +115,7 @@ public class ServerThread extends Thread {
     public byte[] stageB2Response() throws UnknownHostException, IOException {
         ByteBuffer payload = ByteBuffer.allocate(8);
         Random rand = new Random();
-        int tcpPort = rand.nextInt((65535 - ServerUtils.INIT_TCP_PORT) + 1) + ServerUtils.INIT_TCP_PORT;
+        int tcpPort = rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT;
         int psecret = rand.nextInt(100) + 1;
         tcp = new TCPServer(tcpPort);
         payload.putInt(tcpPort);
