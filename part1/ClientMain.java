@@ -48,7 +48,7 @@ public class ClientMain {
         byteBuf.putInt(pSecret);
         byteBuf.putShort(STEP);
         byteBuf.putShort(SID_NUM);
-        
+
         return byteBuf.array();
     }
 
@@ -59,7 +59,7 @@ public class ClientMain {
         // If the packet needs to be padded
         if ((header.length + payload.length) % 4 != 0) {
             padding = 4 - ((header.length + payload.length) % 4);
-        } 
+        }
         // Create new ByteBuffer to put header and payload in with necessary padding
         ByteBuffer mergedBuf = ByteBuffer.allocate(header.length + payload.length + padding);
         mergedBuf.put(header);
@@ -138,6 +138,7 @@ public class ClientMain {
         packetBuf.put(packet);
         // Get the information from the server packet
         int tcpPort = packetBuf.getInt(12);
+        // TODO: print secrets, get rid of this
         int secretB = packetBuf.getInt(16);
         // Connect to the TCP port received from
         // the server
