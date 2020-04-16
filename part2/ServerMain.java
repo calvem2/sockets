@@ -4,11 +4,12 @@ import java.net.*;
 import java.io.IOException;
 
 public class ServerMain {
-    public static void main (String [] args) throws SocketException, IOException, UnknownHostException {
+    public static void main (String [] args) {
         UDPServer udp = new UDPServer(ServerUtils.INIT_PORT, false);
+        System.out.println("Socket created");
         while (true) {
             DatagramPacket dp = udp.receive(ServerUtils.HEADER_SIZE + 12);
-            
+            System.out.println("Packet received");
             if (verifyRequestA(dp.getData())) {
                 udp.processRequest(dp);
                 
@@ -32,7 +33,7 @@ public class ServerMain {
         Random rand = new Random();
         // Create payload
         ByteBuffer payload = ByteBuffer.allocate(16);
-        payload.putInt(rand.nextInt(500) + 1);
+        payload.putInt(rand.nextInt(100) + 1);
         payload.putInt(rand.nextInt(500) + 1);
         // UDP port number range: [12235, 65535]
         payload.putInt(rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT);
@@ -48,12 +49,19 @@ public class ServerMain {
         ByteBuffer request = ByteBuffer.wrap(packet);
         String payload = "hello world\0";
         byte[] payloadArr = payload.getBytes(); 
-        // Verify packet header
-        boolean verifyHeader = ServerUtils.verifyHeader(packet, payloadArr.length, 0);
+        // Verify packet header and length
+        try {
+            ServerUtils.verifyPacket(packet, payloadArr.length, 0);
+        } catch (Exception e) {
+            return false;
+        }
+        // boolean verifyHeader = ServerUtils.verifyHeader(packet, payloadArr.length, 0);//payload.length, 0);
         
-        System.out.println("here is the verify header: " + verifyHeader);
+        // System.out.println("here is the verify header: " + verifyHeader);
+
         // Verify packet payload
-        boolean verifyPayload = verifyHeader;
+        // boolean verifyPayload = verifyHeader;
+        boolean verifyPayload = true;
         int i = 0;
         while (verifyPayload && i <  payloadArr.length) {
             verifyPayload = verifyPayload &&
@@ -62,7 +70,8 @@ public class ServerMain {
         }
 
         // Verify packet is padded
-        boolean verifyPadding = ServerUtils.verifyPadding(packet, payloadArr.length);
-        return verifyPayload && verifyPadding;
+        // boolean verifyPadding = ServerUtils.verifyPadding(packet, payloadArr.length);
+        // return verifyPayload && verifyPadding;
+        return verifyPayload;
     }
 }
