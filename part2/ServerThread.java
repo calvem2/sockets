@@ -123,11 +123,6 @@ public class ServerThread extends Thread {
         // boolean verifyHeader = ServerUtils.verifyHeader(packet, len + 4, secret);
         ServerUtils.verifyPacket(packet, len + 4, secret);
 
-        // TODO: delete later
-        if (!verifyHeader) {
-            System.out.println("Header is bad");
-        }
-
         // Verify payload
         // boolean verifyPayload = ServerUtils.VerifyPacket(packet, len + 4, secret);
         if (request.getInt(ServerUtils.HEADER_SIZE) != id) {
