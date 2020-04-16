@@ -11,18 +11,23 @@ public class ServerMain {
             
             if (verifyRequestA(dp.getData())) {
                 udp.processRequest(dp);
+                
                 // TODO: delete this later
                 System.out.println("Before the stage a response");
+                
                 byte[] response = stageAResponse();
                 udp.send(response);
                 ServerThread thread = new ServerThread(response);
+                
                 // TODO: delete this later 
                 System.out.println("Before the thread start");
+                
                 thread.start();
             }
         }
     }
 
+    // Does the server side for stage A
     public static byte[] stageAResponse() {
         Random rand = new Random();
         // Create payload
@@ -38,18 +43,19 @@ public class ServerMain {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
+    // Verify the client request for stage A
     public static boolean verifyRequestA(byte[] packet) {
         ByteBuffer request = ByteBuffer.wrap(packet);
         String payload = "hello world\0";
         byte[] payloadArr = payload.getBytes(); 
         // Verify packet header
-        boolean verifyHeader = ServerUtils.verifyHeader(packet, payloadArr.length, 0);//payload.length, 0);
+        boolean verifyHeader = ServerUtils.verifyHeader(packet, payloadArr.length, 0);
         
         System.out.println("here is the verify header: " + verifyHeader);
         // Verify packet payload
         boolean verifyPayload = verifyHeader;
         int i = 0;
-        while (verifyPayload && i <  payloadArr.length) { //payload.length()) {
+        while (verifyPayload && i <  payloadArr.length) {
             verifyPayload = verifyPayload &&
                             payloadArr[i] == request.get(i + ServerUtils.HEADER_SIZE);
             i++;

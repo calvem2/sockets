@@ -31,6 +31,7 @@ public class ServerThread extends Thread {
             System.out.println("Done with stage B");
 
             if (stageB) {
+                System.out.println("Stage B returned true.");
                 // Stage C
                 if (tcp.accept() != null) {
                     stageC();
@@ -43,13 +44,13 @@ public class ServerThread extends Thread {
                 System.out.println("Done with stage D");
                 tcp.close();
             }
-
-
+            System.out.println("stageB is false");
         } catch (Exception e) {
-
+            System.out.println("Error..");
         }
     }
 
+    // Does the server side stage B 
     public boolean stageB() throws IOException {
         int ackedPacketID = 0;
         Random rand = new Random();
@@ -58,7 +59,16 @@ public class ServerThread extends Thread {
         boolean retransmitted = false;
         while (ackedPacketID != num) {
             DatagramPacket packet = udp.receive(ServerUtils.HEADER_SIZE + len + 4);
+            // Verify the packet from the client
             if (packet == null || !verifyStageB(packet.getData(), ackedPacketID)) {
+                // TODO: delete these later
+                if (packet == null) {
+                    System.out.println("packet is null");
+                }
+                if (!verifyStageB(packet.getData(), ackedPacketID)) {
+                    System.out.println("verify stage is false");
+                }
+                
                 break;
             }
             udp.processRequest(packet);
@@ -68,6 +78,8 @@ public class ServerThread extends Thread {
                 int packetID = request.getInt(ServerUtils.HEADER_SIZE);
                 // Ensure at least one packet is not acked
                 if (packetID != retransmitID || retransmitted) {
+                    // TODO: delete this later
+                    System.out.println("here is the stage B packet ID: " + ackedPacketID);
                     udp.send(stageB1Response(ackedPacketID));
                     ackedPacketID++;
                 }
@@ -82,13 +94,20 @@ public class ServerThread extends Thread {
             udp.send(response);
             return true;
         }
+
         return false;
     }
 
+    // Verify the packet sent from client
     public boolean verifyStageB(byte[] packet, int id) {
         ByteBuffer request = ByteBuffer.wrap(packet);
         // Verify header
         boolean verifyHeader = ServerUtils.verifyHeader(packet, len + 4, secret);
+
+        // TODO: delete later
+        if (!verifyHeader) {
+            System.out.println("Header is bad");
+        }
 
         // Verify payload
         boolean verifyPayload = verifyHeader;
@@ -97,14 +116,31 @@ public class ServerThread extends Thread {
             verifyPayload = verifyPayload && (request.get(i + ServerUtils.HEADER_SIZE + 4) == 0);
             i++;
         }
+
+        // TODO: delete later
+        if (!verifyPayload) {
+            System.out.println("payload isn't all 0s");
+        }
+
         verifyPayload = verifyPayload && request.getInt(ServerUtils.HEADER_SIZE) == id;
+
+        // TODO: delete later
+        if (!verifyPayload) {
+            System.out.println("payload id is bad expected: " + id + " actual: " + request.getInt(ServerUtils.HEADER_SIZE));
+        }
 
         // Verify padding
         boolean verifyPadding = ServerUtils.verifyPadding(packet, len + 4);
 
+        // TODO: delete later
+        if (!verifyPadding) {
+            System.out.println("padding is bad");
+        }
+
         return verifyPayload && verifyPadding;
     }
 
+    // Create the server packet sent in stage b1
     public byte[] stageB1Response(int ack) {
         ByteBuffer payload = ByteBuffer.allocate(4);
         payload.putInt(ack);
@@ -112,6 +148,7 @@ public class ServerThread extends Thread {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
+    // Create the server packet sent in stage b2
     public byte[] stageB2Response() throws UnknownHostException, IOException {
         ByteBuffer payload = ByteBuffer.allocate(8);
         Random rand = new Random();
@@ -124,7 +161,7 @@ public class ServerThread extends Thread {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
-
+    // Do the server side stage C
     public void stageC() throws IOException {
         ByteBuffer payload = ByteBuffer.allocate(13);
         Random rand = new Random();
@@ -143,6 +180,7 @@ public class ServerThread extends Thread {
         tcp.send(response);
     }
 
+    // Do the server size stage D
     public void stageD() throws IOException {
         int received = 0;
         while (received != num) {
@@ -157,6 +195,7 @@ public class ServerThread extends Thread {
         }
     }
 
+    // Verify the client's packet from stage D
     public boolean verifyStageD(byte[] packet) {
         // Verify header
         boolean verifyHeader = ServerUtils.verifyHeader(packet, len, secret);
@@ -175,7 +214,9 @@ public class ServerThread extends Thread {
         return verifyPayload;
     }
 
+    // Create the server packet for stage D
     public byte[] stageDResponse() {
+        // Create the payload
         ByteBuffer payload = ByteBuffer.allocate(4);
         Random rand = new Random();
         int psecret = rand.nextInt(100) + 1;

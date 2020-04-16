@@ -121,7 +121,7 @@ public class ClientMain {
         }
 
         // TODO: remove this later
-        System.out.println(secretA);
+        System.out.println("Here is the secret A: " + secretA);
 
         byte[] response = udp.receive(HEADER_SIZE + 16);
         // Close the UDP socket
@@ -140,6 +140,7 @@ public class ClientMain {
         int tcpPort = packetBuf.getInt(12);
         // TODO: print secrets, get rid of this
         int secretB = packetBuf.getInt(16);
+        System.out.println("Here is secret b: " + secretB);
         // Connect to the TCP port received from
         // the server
         tcp = new TCPConnect(tcpPort);
