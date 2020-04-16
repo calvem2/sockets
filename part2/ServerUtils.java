@@ -22,11 +22,12 @@ public class ServerUtils {
     // Merge the header and the payload
     // Return the array of bytes with the header and payload merged together
     public static byte[] mergeHeaderPayload(byte[] header, byte[] payload) {
-        int padding = 0;
-        // If the packet needs to be padded
-        if ((header.length + payload.length) % 4 != 0) {
-            padding = 4 - ((header.length + payload.length) % 4);
-        }
+        // int padding = 0;
+        // // If the packet needs to be padded
+        // if ((header.length + payload.length) % 4 != 0) {
+        //     padding = 4 - ((header.length + payload.length) % 4);
+        // }
+        int padding = getPadding(header.length + payload.length);
         // Create new ByteBuffer to put header and payload in with necessary padding
         ByteBuffer mergedBuf = ByteBuffer.allocate(header.length + payload.length + padding);
         mergedBuf.put(header);
@@ -35,13 +36,37 @@ public class ServerUtils {
         return mergedBuf.array();
     }
 
-    public static boolean verifyPacket(byte[] packet, int len, int secret) {
+    public static int getPadding(int len) {
+        int padding = 0;
+        if (len % 4 != 0) {
+            padding += 4 - (len % 4);
+        }
+        return padding;
+    }
+
+    public static void verifyPacket(byte[] packet, int len, int secret) throws Exception {
         ByteBuffer request = ByteBuffer.wrap(packet);
-        return packet.length % 4 == 0 &&
-               request.getInt(0) == len &&
-               request.getInt(4) == secret &&
-               request.getShort(8) == 1 &&
-               request.getShort(10) == ServerUtils.SID_NUM;
+        // int padding = 0;
+        // if ((HEADER_SIZE + len) % 4 != 0) {
+        //     padding = 4 - ((HEADER_SIZE + len) % 4);
+        // }
+        int padding = getPadding(HEADER_SIZE + len);
+        if (packet.length != len + padding + HEADER_SIZE) {
+            // System.out.println(packet.length);
+            // System.out.println(len + padding + HEADER_SIZE);
+            throw new Exception("Packet not aligned correctly");
+        } else if (request.getInt(0) != len ||
+                   request.getInt(4) != secret ||
+                   request.getShort(8) != 1 ||
+                   request.getShort(10) != ServerUtils.SID_NUM) {
+            throw new Exception("Packet header incorrect");
+        }
+        // System.out.println("Packet verified");
+        // return packet.length % 4 == 0 &&
+        //        request.getInt(0) == len &&
+        //        request.getInt(4) == secret &&
+        //        request.getShort(8) == 1 &&
+        //        request.getShort(10) == ServerUtils.SID_NUM;
     }
 
 //     public static boolean verifyPadding(byte[] packet) {

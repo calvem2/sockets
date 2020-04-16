@@ -3,7 +3,7 @@ import java.net.*;
 import java.io.IOException;
 
 public class UDPConnect {
-    private static final String SERVER = "attu2.cs.washington.edu";
+    private static final String SERVER = "attu6.cs.washington.edu";
     
     private DatagramSocket udp;
     private int port;
@@ -31,6 +31,11 @@ public class UDPConnect {
             System.out.println("Error: Could not find host");
             e.printStackTrace();
         }
+    }
+
+    // TODO: delete??
+    public boolean isConnected() {
+        return udp.isConnected();
     }
 
     // Send the packet to the server

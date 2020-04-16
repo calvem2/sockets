@@ -25,44 +25,70 @@ public class ServerThread extends Thread {
             // TODO: Remove this later
             System.out.println("Done with stage A");
             // Stage B
-            boolean stageB = stageB();
+            // boolean stageB = stageB();
+            stageB();
             udp.close();
             // TODO: Remove this later
             System.out.println("Done with stage B");
 
-            if (stageB) {
-                // Stage C
-                if (tcp.accept() != null) {
-                    stageC();
-                    // TODO: Remove this later
-                    System.out.println("Done with stage C");
-                }
-                // Stage D
-                stageD();
-                // TODO: Remove this later
-                System.out.println("Done with stage D");
-                //tcp.close();
+            if (tcp.accept() == null) {
+                throw new Exception("TCP socket timed out waiting for connection");
             }
+            stageC();
+            // TODO: Remove this later
+            System.out.println("Done with stage C");
+
+            // Stage D
+            stageD();
+            System.out.println("Done with stage D");
+            tcp.close();
+            // if (stageB) {
+            //     // Stage C
+            //     if (tcp.accept() != null) {
+            //         stageC();
+            //         // TODO: Remove this later
+            //         System.out.println("Done with stage C");
+            //     }
+            //     // Stage D
+            //     stageD();
+            //     // TODO: Remove this later
+            //     System.out.println("Done with stage D");
+            //     //tcp.close();
+            // }
 
 
         } catch (Exception e) {
-
+            System.out.println(e.getMessage());
         } finally {
-            tcp.close();
+            // need to close in case we didn't bc of an exception 
         }
     }
 
-    public boolean stageB() {
+    /// STAGE B
+
+    public void stageB() throws Exception {
         int ackedPacketID = 0;
         Random rand = new Random();
         // Guarantee at least one packet is not acked
         int retransmitID = rand.nextInt(num);
         boolean retransmitted = false;
         while (ackedPacketID != num) {
-            DatagramPacket packet = udp.receive(ServerUtils.HEADER_SIZE + len + 4);
-            if (packet == null || !verifyStageB(packet.getData(), ackedPacketID)) {
-                break;
+            int expectedLength = ServerUtils.HEADER_SIZE + len + 4;
+            // if (expectedLength % 4 != 0) {
+            //     int padding = 4 - (expectedLength % 4);
+            //     expectedLength += padding;
+            // }
+            expectedLength += ServerUtils.getPadding(expectedLength);
+            DatagramPacket packet = udp.receive(expectedLength);
+            // System.out.println("Received packet " + ByteBuffer.wrap(packet.getData()).getInt(12));
+            // if (packet == null || !verifyStageB(packet.getData(), ackedPacketID)) {
+            //     break;
+            // }
+            if (packet == null) {
+                throw new Exception("Stage B timed out waiting for client");
             }
+            
+            verifyStageB(packet.getData(), ackedPacketID);
             udp.processRequest(packet);
             ByteBuffer request = ByteBuffer.wrap(packet.getData());
             // Send ACK response
@@ -71,6 +97,7 @@ public class ServerThread extends Thread {
                 // Ensure at least one packet is not acked
                 if (packetID != retransmitID || retransmitted) {
                     udp.send(stageB1Response(ackedPacketID));
+                    // System.out.println("ACK " + ackedPacketID + " sent");
                     ackedPacketID++;
                 }
             } else {
@@ -79,30 +106,40 @@ public class ServerThread extends Thread {
         }
 
         // Send final response if we recieved all packets
-        if (ackedPacketID == num) {
+        // if (ackedPacketID == num) {
             byte[] response = stageB2Response();
             udp.send(response);
-            return true;
-        }
-        return false;
+        //     return true;
+        // }
+        // return false;
     }
 
-    public boolean verifyStageB(byte[] packet, int id) {
+    public void verifyStageB(byte[] packet, int id) throws Exception {
         ByteBuffer request = ByteBuffer.wrap(packet);
         // Verify packet length and header
         // boolean verifyPadding = ServerUtils.verifyPadding(packet);
         // boolean verifyHeader = ServerUtils.verifyHeader(packet, len + 4, secret);
+        ServerUtils.verifyPacket(packet, len + 4, secret);
 
         // Verify payload
-        boolean verifyPayload = ServerUtils.VerifyPacket(packet, len + 4, secret);
+        // boolean verifyPayload = ServerUtils.VerifyPacket(packet, len + 4, secret);
+        if (request.getInt(ServerUtils.HEADER_SIZE) != id) {
+            System.out.println(request.getInt(ServerUtils.HEADER_SIZE));
+            System.out.println(id);
+            throw new Exception("Stage B packets arrived out of order");
+        }
+        // boolean verifyPayload = true;
         int i = 0;
-        while (verifyPayload && i < len) {
-            verifyPayload = verifyPayload && (request.get(i + ServerUtils.HEADER_SIZE + 4) == 0);
+        // while (verifyPayload && i < len) {
+        while (i < len) {
+            // verifyPayload = verifyPayload && (request.get(i + ServerUtils.HEADER_SIZE + 4) == 0);
+            if (request.get(i + ServerUtils.HEADER_SIZE + 4) != 0) {
+                throw new Exception("Stage B packet(s) not padded with 0s");
+            }
             i++;
         }
-        verifyPayload = verifyPayload && request.getInt(ServerUtils.HEADER_SIZE) == id;
-
-        return verifyPayload;
+        // verifyPayload = verifyPayload && request.getInt(ServerUtils.HEADER_SIZE) == id;
+        // return verifyPayload;
     }
 
     public byte[] stageB1Response(int ack) {
@@ -124,11 +161,12 @@ public class ServerThread extends Thread {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
+    /// STAGE C
 
     public void stageC() {
         ByteBuffer payload = ByteBuffer.allocate(13);
         Random rand = new Random();
-        num = rand.nextInt(500) + 1;
+        num = rand.nextInt(100) + 1;
         len = rand.nextInt(500) + 1;
         secret = rand.nextInt(100) + 1;
         c = (byte) (rand.nextInt(94) + 33);
@@ -143,34 +181,46 @@ public class ServerThread extends Thread {
         tcp.send(response);
     }
 
-    public void stageD() {
+    // STAGE D
+
+    public void stageD() throws Exception {
         int received = 0;
         while (received != num) {
-            byte[] request = tcp.receive(ServerUtils.HEADER_SIZE + len);
-            if (request == null || !verifyStageD(request)) {
-                break;
+            int expectedLength = ServerUtils.HEADER_SIZE + len;
+            expectedLength += ServerUtils.getPadding(expectedLength);
+            byte[] request = tcp.receive(expectedLength);
+            // if (request == null || !verifyStageD(request)) {
+            //     break;
+            // }
+            if (request == null) {
+                throw new Exception("Stage D timed out waiting for client");
             }
+            verifyStageD(request);
             received++;
         }
-        if (received == num) {
+        // if (received == num) {
             tcp.send(stageDResponse());
-        }
+        // }
     }
 
-    public boolean verifyStageD(byte[] packet) {
+    public void verifyStageD(byte[] packet) throws Exception {
         // // Verify packet header and length
         // boolean verifyHeader = ServerUtils.verifyHeader(packet, len, secret);
         // boolean verifyPadding = ServerUtils.verifyPadding(packet);
 
         // Verify payload
-        boolean verifyPayload = ServerUtils.VerifyPacket(packet, len, secret);
+        ServerUtils.verifyPacket(packet, len, secret);
         int i = 0;
-        while (verifyPayload && i < len) {
-            verifyPayload = verifyPayload && packet[i + ServerUtils.HEADER_SIZE] == c;
+        while (i < len) {
+            // verifyPayload = verifyPayload && packet[i + ServerUtils.HEADER_SIZE] == c;
+            // if (verifyPayload && packet[i + ServerUtils.HEADER_SIZE] != c) {
+            if (packet[i + ServerUtils.HEADER_SIZE] != c) {
+                throw new Exception("Stage D packet payload incorrect");
+            }
             i++;
         }
 
-        return verifyPayload;
+        // return verifyPayload;
     }
 
     public byte[] stageDResponse() {

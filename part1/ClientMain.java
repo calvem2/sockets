@@ -78,6 +78,7 @@ public class ClientMain {
         byte[] packet = mergeHeaderPayload(header, payload);
         // Send the packet and receive a packet from the server
         udp.send(packet);
+        // System.out.println("Packet sent");
         byte[] response = udp.receive(HEADER_SIZE + 16);
         // Close the UDP socket
         udp.close();
@@ -116,6 +117,8 @@ public class ClientMain {
             // ack packet has been received from the server
             while (ackedPacket == null || ByteBuffer.wrap(ackedPacket).getInt(12) != i) {
                 udp.send(dataPacket);
+                // System.out.println("Packet " + i + " sent");
+                // System.out.println(udp.isConnected());
                 ackedPacket = udp.receive(HEADER_SIZE + 4);
             }
         }

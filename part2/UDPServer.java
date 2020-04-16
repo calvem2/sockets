@@ -52,11 +52,11 @@ public class UDPServer{
     }
 
     // Process request recieved from client
-    public byte[] processRequest(DatagramPacket request) {
+    public void processRequest(DatagramPacket request) {
         clientAddr = request.getAddress();
         clientPort = request.getPort();
-        byte[] data = request.getData();
-        return data;
+        // byte[] data = request.getData();
+        // return data;
     }
 
     // Close the socket
