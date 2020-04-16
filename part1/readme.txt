@@ -1,5 +1,5 @@
-Claire Beard: 1732947
-Megan Calverley: 
+Claire Beard: cbeard21
+Megan Calverley: calvem2
 
 Server secrets:
 
