@@ -11,7 +11,7 @@ public class ClientMain {
 
     public static TCPConnect tcp;
     
-    public static void main (String[] args) throws SocketException, UnknownHostException, IOException {
+    public static void main (String[] args) {
         // Stage A
         byte[] aResponsePacket = stageA();
         
@@ -69,7 +69,7 @@ public class ClientMain {
     }
 
     // Does the client side stage A
-    public static byte[] stageA() throws SocketException, UnknownHostException, IOException {
+    public static byte[] stageA() {
         UDPConnect udp = new UDPConnect(PORT);
         // Create the payload, header, and packet
         String str = "hello world\0";
@@ -78,7 +78,7 @@ public class ClientMain {
         byte[] packet = mergeHeaderPayload(header, payload);
         // Send the packet and receive a packet from the server
         udp.send(packet);
-        byte[] response = udp.receive(HEADER_SIZE + 32);
+        byte[] response = udp.receive(HEADER_SIZE + 16);
         // Close the UDP socket
         udp.close();
 
@@ -86,7 +86,7 @@ public class ClientMain {
     }
 
     // Does the client side stage B
-    public static byte[] stageB(byte[] packet) throws UnknownHostException, IOException {
+    public static byte[] stageB(byte[] packet) {
         // Creates the byte buffer from the packet received
         // from the server from stage A
         ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
@@ -123,7 +123,7 @@ public class ClientMain {
         // TODO: remove this later
         System.out.println(secretA);
 
-        byte[] response = udp.receive(HEADER_SIZE + 16);
+        byte[] response = udp.receive(HEADER_SIZE + 8);
         // Close the UDP socket
         udp.close();
 
@@ -131,7 +131,7 @@ public class ClientMain {
     }
 
     // Does the client side stage C
-    public static byte[] stageC(byte[] packet) throws UnknownHostException, IOException  {
+    public static byte[] stageC(byte[] packet) {
         // Creates a byte buffer from the packet received
         // from the server in stage B
         ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
@@ -144,13 +144,13 @@ public class ClientMain {
         // the server
         tcp = new TCPConnect(tcpPort);
         // Receive the packet from the server
-        byte[] response = tcp.receive(HEADER_SIZE + 13);
+        byte[] response = tcp.receive(HEADER_SIZE + 16);
 
         return response;
     }
 
     // Does the client side stage D
-    public static byte[] stageD(byte[] packet) throws IOException {
+    public static byte[] stageD(byte[] packet) {
         // Creates a byte buffer from the packet received
         // from the server in stage C
         ByteBuffer packetBuf = ByteBuffer.allocate(packet.length);
