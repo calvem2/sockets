@@ -4,7 +4,7 @@ import java.net.*;
 import java.io.IOException;
 
 public class ServerMain {
-    public static void main (String [] args) throws SocketException, IOException, UnknownHostException {
+    public static void main (String [] args) {
         UDPServer udp = new UDPServer(ServerUtils.INIT_PORT, false);
         while (true) {
             DatagramPacket dp = udp.receive(ServerUtils.HEADER_SIZE + 12);

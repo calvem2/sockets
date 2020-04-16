@@ -12,7 +12,7 @@ public class ServerThread extends Thread {
     private int secret;
 
 
-    public ServerThread(byte[] stageAMessage) throws SocketException, UnknownHostException {
+    public ServerThread(byte[] stageAMessage) {
         ByteBuffer response = ByteBuffer.wrap(stageAMessage);
         this.num = response.getInt(12);
         this.len = response.getInt(16);
@@ -41,16 +41,18 @@ public class ServerThread extends Thread {
                 stageD();
                 // TODO: Remove this later
                 System.out.println("Done with stage D");
-                tcp.close();
+                //tcp.close();
             }
 
 
         } catch (Exception e) {
 
+        } finally {
+            tcp.close();
         }
     }
 
-    public boolean stageB() throws IOException {
+    public boolean stageB() {
         int ackedPacketID = 0;
         Random rand = new Random();
         // Guarantee at least one packet is not acked
@@ -112,7 +114,7 @@ public class ServerThread extends Thread {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
-    public byte[] stageB2Response() throws UnknownHostException, IOException {
+    public byte[] stageB2Response() {
         ByteBuffer payload = ByteBuffer.allocate(8);
         Random rand = new Random();
         int tcpPort = rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT;
@@ -125,7 +127,7 @@ public class ServerThread extends Thread {
     }
 
 
-    public void stageC() throws IOException {
+    public void stageC() {
         ByteBuffer payload = ByteBuffer.allocate(13);
         Random rand = new Random();
         num = rand.nextInt(500) + 1;
@@ -143,7 +145,7 @@ public class ServerThread extends Thread {
         tcp.send(response);
     }
 
-    public void stageD() throws IOException {
+    public void stageD() {
         int received = 0;
         while (received != num) {
             byte[] request = tcp.receive(ServerUtils.HEADER_SIZE + len);
