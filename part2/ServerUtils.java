@@ -35,23 +35,27 @@ public class ServerUtils {
         return mergedBuf.array();
     }
 
-    public static boolean verifyHeader(byte[] packet, int len, int secret) {
+    public static boolean verifyPacket(byte[] packet, int len, int secret) {
         ByteBuffer request = ByteBuffer.wrap(packet);
-        return request.getInt(0) == len && request.getInt(4) == secret &&
-                request.getShort(8) == 1 && request.getShort(10) == ServerUtils.SID_NUM;
+        return packet.length % 4 == 0 &&
+               request.getInt(0) == len &&
+               request.getInt(4) == secret &&
+               request.getShort(8) == 1 &&
+               request.getShort(10) == ServerUtils.SID_NUM;
     }
 
-    public static boolean verifyPadding(byte[] packet, int payloadLen) {
-        // Verify packet is 4-byte aligned
-        if (packet.length % 4 != 0) {
-            return false;
-        }
-        // Verify packet is padded with 0's
-//        for (int i = payloadLen + HEADER_SIZE; i < packet.length; i++) {
-//            if (packet[i] != 0) {
-//                return false;
-//            }
-//        }
-        return true;
-    }
+//     public static boolean verifyPadding(byte[] packet) {
+//         // Verify packet is 4-byte aligned
+//         // if (packet.length % 4 != 0) {
+//         //     return false;
+//         // }
+//         // Verify packet is padded with 0's
+// //        for (int i = payloadLen + HEADER_SIZE; i < packet.length; i++) {
+// //            if (packet[i] != 0) {
+// //                return false;
+// //            }
+// //        }
+//         // return true;
+//         return packet.length % 4 == 0
+//     }
 }

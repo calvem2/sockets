@@ -89,11 +89,12 @@ public class ServerThread extends Thread {
 
     public boolean verifyStageB(byte[] packet, int id) {
         ByteBuffer request = ByteBuffer.wrap(packet);
-        // Verify header
-        boolean verifyHeader = ServerUtils.verifyHeader(packet, len + 4, secret);
+        // Verify packet length and header
+        // boolean verifyPadding = ServerUtils.verifyPadding(packet);
+        // boolean verifyHeader = ServerUtils.verifyHeader(packet, len + 4, secret);
 
         // Verify payload
-        boolean verifyPayload = verifyHeader;
+        boolean verifyPayload = ServerUtils.VerifyPacket(packet, len + 4, secret);
         int i = 0;
         while (verifyPayload && i < len) {
             verifyPayload = verifyPayload && (request.get(i + ServerUtils.HEADER_SIZE + 4) == 0);
@@ -101,10 +102,7 @@ public class ServerThread extends Thread {
         }
         verifyPayload = verifyPayload && request.getInt(ServerUtils.HEADER_SIZE) == id;
 
-        // Verify padding
-        boolean verifyPadding = ServerUtils.verifyPadding(packet, len + 4);
-
-        return verifyPayload && verifyPadding;
+        return verifyPayload;
     }
 
     public byte[] stageB1Response(int ack) {
@@ -160,14 +158,12 @@ public class ServerThread extends Thread {
     }
 
     public boolean verifyStageD(byte[] packet) {
-        // Verify header
-        boolean verifyHeader = ServerUtils.verifyHeader(packet, len, secret);
-
-        // Verify padding
-        boolean verifyPadding = ServerUtils.verifyPadding(packet, len);
+        // // Verify packet header and length
+        // boolean verifyHeader = ServerUtils.verifyHeader(packet, len, secret);
+        // boolean verifyPadding = ServerUtils.verifyPadding(packet);
 
         // Verify payload
-        boolean verifyPayload = verifyHeader && verifyPadding;
+        boolean verifyPayload = ServerUtils.VerifyPacket(packet, len, secret);
         int i = 0;
         while (verifyPayload && i < len) {
             verifyPayload = verifyPayload && packet[i + ServerUtils.HEADER_SIZE] == c;
