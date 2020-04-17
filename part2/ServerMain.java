@@ -6,10 +6,8 @@ import java.io.IOException;
 public class ServerMain {
     public static void main (String [] args) {
         UDPServer udp = new UDPServer(ServerUtils.INIT_PORT, false);
-        System.out.println("Socket created");
         while (true) {
             DatagramPacket dp = udp.receive(ServerUtils.HEADER_SIZE + 12);
-            System.out.println("Packet received");
             if (verifyRequestA(dp.getData())) {
                 udp.processRequest(dp);                
                 byte[] response = stageAResponse();

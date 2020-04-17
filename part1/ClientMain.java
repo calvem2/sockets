@@ -14,26 +14,50 @@ public class ClientMain {
     public static void main (String[] args) {
         // Stage A
         byte[] aResponsePacket = stageA();
-        
-        // TODO: Remove later
-        System.out.println("Done with stage A");
+        System.out.println("Stage A Response:");
+        // Extract the information from the stage A response packet
+        // and print the information
+        ByteBuffer aBuf = ByteBuffer.allocate(aResponsePacket.length);
+        aBuf.put(aResponsePacket);
+        System.out.println("num: " + aBuf.getInt(12));
+        System.out.println("len: " + aBuf.getInt(16));
+        System.out.println("udp_port: " + aBuf.getInt(20));
+        System.out.println("secretA: " + aBuf.getInt(24));
+        System.out.println("Done with stage A\n");
         
         // Stage B
         byte[] bResponsePacket = stageB(aResponsePacket);
-        
-        // TODO: Remove later
-        System.out.println("Done with stage B");
+        System.out.println("Stage B Response:");
+        // Extract the information from the stage B response packet
+        // and print the information
+        ByteBuffer bBuf = ByteBuffer.allocate(bResponsePacket.length);
+        bBuf.put(bResponsePacket);
+        System.out.println("tcp_port: " + bBuf.getInt(12));
+        System.out.println("secretB: " + bBuf.getInt(16));
+        System.out.println("Done with stage B\n");
 
         // Stage C
         byte[] cResponsePacket = stageC(bResponsePacket);
-        
-        // TODO: Remove later
-        System.out.println("Done with stage C");
+        System.out.println("Stage C Response:");
+        // Extract the information from the stage C response packet
+        // and print the information
+        ByteBuffer cBuf = ByteBuffer.allocate(cResponsePacket.length);
+        cBuf.put(cResponsePacket);
+        System.out.println("num2: " + cBuf.getInt(12));
+        System.out.println("len2: " + cBuf.getInt(16));
+        System.out.println("secretC: " + cBuf.getInt(20));
+        // TODO: Might need to change this later
+        System.out.println("tcp_port: " + cBuf.get(24));
+        System.out.println("Done with stage C\n");
 
         // Stage D
         byte[] dResponsePacket = stageD(cResponsePacket);
-        
-        // TODO: Remove later
+        System.out.println("Stage D Response:");
+        // Extract the information from the stage D response packet
+        // and print the information
+        ByteBuffer dBuf = ByteBuffer.allocate(dResponsePacket.length);
+        dBuf.put(dResponsePacket);
+        System.out.println("secretD: " + dBuf.getInt(12));
         System.out.println("Done with stage D");
     }
 
