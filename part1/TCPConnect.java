@@ -3,7 +3,7 @@ import java.net.*;
 import java.io.*;
 
 public class TCPConnect {
-    private static final String SERVER = "attu6.cs.washington.edu";
+    private static final String SERVER = "attu7.cs.washington.edu";
     
     private Socket tcp;
     private int port;
