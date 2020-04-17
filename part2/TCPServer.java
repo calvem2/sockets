@@ -16,6 +16,10 @@ public class TCPServer {
         }
     }
 
+    public int getLocalPort() {
+        return tcp.getLocalPort();
+    }
+
     public Socket accept() {
         try {
             socket = tcp.accept();
@@ -61,8 +65,12 @@ public class TCPServer {
     // Close the socket
     public void close() {
         try {
+            if (!tcp.isClosed()) {
             tcp.close();
-            socket.close();
+            }
+            if (!socket.isClosed()) {
+                socket.close();
+            }
         } catch (IOException e) {
             System.out.println("Error: Could not close socket");
             e.printStackTrace();

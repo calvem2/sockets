@@ -4,7 +4,6 @@ public class ServerUtils {
     public static final short STEP = 2;
     public static final short SID_NUM = 947;
     public static final int INIT_PORT = 12235;
-    public static final int MIN_PORT = 12236;
     public static final int HEADER_SIZE = 12;
     public static final int TIMEOUT = 3000;
 

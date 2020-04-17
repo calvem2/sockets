@@ -11,11 +11,12 @@ public class ServerThread extends Thread {
     private byte c;
     private int secret;
 
-    public ServerThread(byte[] stageAMessage) {
+    public ServerThread(byte[] stageAMessage, UDPServer server) {
         ByteBuffer response = ByteBuffer.wrap(stageAMessage);
         this.num = response.getInt(12);
         this.len = response.getInt(16);
-        udp = new UDPServer(response.getInt(20), true);
+        // udp = new UDPServer(response.getInt(20), true);
+        udp = server;
         this.secret = response.getInt(24);
     }
 
@@ -37,7 +38,9 @@ public class ServerThread extends Thread {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         } finally {
-            // TODO: need to close in case we didn't bc of an exception 
+            // Clean up
+            udp.close();
+            tcp.close();
         }
     }
 
@@ -86,8 +89,6 @@ public class ServerThread extends Thread {
 
         // Verify payload
         if (request.getInt(ServerUtils.HEADER_SIZE) != id) {
-            System.out.println(request.getInt(ServerUtils.HEADER_SIZE));
-            System.out.println(id);
             throw new Exception("Stage B packets arrived out of order");
         }
         int i = 0;
@@ -111,10 +112,10 @@ public class ServerThread extends Thread {
     public byte[] stageB2Response() {
         ByteBuffer payload = ByteBuffer.allocate(8);
         Random rand = new Random();
-        int tcpPort = rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT;
+        // int tcpPort = rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT;
         int psecret = rand.nextInt(100) + 1;
-        tcp = new TCPServer(tcpPort);
-        payload.putInt(tcpPort);
+        tcp = new TCPServer(0);
+        payload.putInt(tcp.getLocalPort());
         payload.putInt(psecret);
         byte[] header = ServerUtils.createHeader(8, psecret);
         return ServerUtils.mergeHeaderPayload(header, payload.array());

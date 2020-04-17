@@ -6,15 +6,16 @@ import java.io.IOException;
 public class ServerMain {
     public static void main (String [] args) {
         UDPServer udp = new UDPServer(ServerUtils.INIT_PORT, false);
-        System.out.println("Socket created");
         while (true) {
             DatagramPacket dp = udp.receive(ServerUtils.HEADER_SIZE + 12);
-            System.out.println("Packet received");
             if (verifyRequestA(dp.getData())) {
                 udp.processRequest(dp);                
-                byte[] response = stageAResponse();
+                // Get UDP port to be used in Stage B
+                UDPServer stageBServer = new UDPServer(0, true);
+                int stageBPort = stageBServer.getLocalPort();
+                byte[] response = ByteBuffer.wrap(stageAResponse()).putInt(20, stageBPort).array();
                 udp.send(response);
-                ServerThread thread = new ServerThread(response); 
+                ServerThread thread = new ServerThread(response, stageBServer); 
                 thread.start();
             }
         }
@@ -28,9 +29,9 @@ public class ServerMain {
         payload.putInt(rand.nextInt(100) + 1);
         payload.putInt(rand.nextInt(500) + 1);
         // UDP port number range: [12235, 65535]
-        payload.putInt(rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT);
+        //payload.putInt(rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT);
         int psecret = rand.nextInt(100) + 1;
-        payload.putInt(psecret);
+        payload.putInt(12, psecret);
         // Merge payload and header
         byte[] header = ServerUtils.createHeader(16, psecret);
         return ServerUtils.mergeHeaderPayload(header, payload.array());

@@ -7,10 +7,13 @@ public class UDPServer{
     private InetAddress clientAddr;
     private int clientPort;
 
-
     public UDPServer(int port, boolean timeout) {
         try {
-            udp = new DatagramSocket(port);
+            if (port == 0) {
+                udp = new DatagramSocket();
+            } else {
+                udp = new DatagramSocket(port);
+            }
 
             // Enable timeout
             if (timeout) {
@@ -20,6 +23,10 @@ public class UDPServer{
             System.out.println("Error: Could not open open UDP socket");
             e.printStackTrace();
         }
+    }
+
+    public int getLocalPort() {
+        return udp.getLocalPort();
     }
 
     // Send the packet to the server
@@ -58,6 +65,8 @@ public class UDPServer{
 
     // Close the socket
     public void close() {
-        udp.close();
+        if (!udp.isClosed()) {
+            udp.close();
+        }
     }
 }
