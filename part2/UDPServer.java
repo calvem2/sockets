@@ -3,7 +3,6 @@ import java.net.*;
 import java.io.IOException;
 
 public class UDPServer{
-    // Server socket
     private DatagramSocket udp;
     private InetAddress clientAddr;
     private int clientPort;
@@ -55,8 +54,6 @@ public class UDPServer{
     public void processRequest(DatagramPacket request) {
         clientAddr = request.getAddress();
         clientPort = request.getPort();
-        // byte[] data = request.getData();
-        // return data;
     }
 
     // Close the socket

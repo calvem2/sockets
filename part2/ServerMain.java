@@ -11,18 +11,10 @@ public class ServerMain {
             DatagramPacket dp = udp.receive(ServerUtils.HEADER_SIZE + 12);
             System.out.println("Packet received");
             if (verifyRequestA(dp.getData())) {
-                udp.processRequest(dp);
-                
-                // TODO: delete this later
-                System.out.println("Before the stage a response");
-                
+                udp.processRequest(dp);                
                 byte[] response = stageAResponse();
                 udp.send(response);
-                ServerThread thread = new ServerThread(response);
-                
-                // TODO: delete this later 
-                System.out.println("Before the thread start");
-                
+                ServerThread thread = new ServerThread(response); 
                 thread.start();
             }
         }
@@ -55,12 +47,7 @@ public class ServerMain {
         } catch (Exception e) {
             return false;
         }
-        // boolean verifyHeader = ServerUtils.verifyHeader(packet, payloadArr.length, 0);//payload.length, 0);
-        
-        // System.out.println("here is the verify header: " + verifyHeader);
-
         // Verify packet payload
-        // boolean verifyPayload = verifyHeader;
         boolean verifyPayload = true;
         int i = 0;
         while (verifyPayload && i <  payloadArr.length) {
@@ -70,8 +57,6 @@ public class ServerMain {
         }
 
         // Verify packet is padded
-        // boolean verifyPadding = ServerUtils.verifyPadding(packet, payloadArr.length);
-        // return verifyPayload && verifyPadding;
         return verifyPayload;
     }
 }

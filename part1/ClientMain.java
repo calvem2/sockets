@@ -17,28 +17,24 @@ public class ClientMain {
         
         // TODO: Remove later
         System.out.println("Done with stage A");
-        System.out.println(Arrays.toString(aResponsePacket));
         
         // Stage B
         byte[] bResponsePacket = stageB(aResponsePacket);
         
         // TODO: Remove later
         System.out.println("Done with stage B");
-        System.out.println(Arrays.toString(bResponsePacket));
 
         // Stage C
         byte[] cResponsePacket = stageC(bResponsePacket);
         
         // TODO: Remove later
         System.out.println("Done with stage C");
-        System.out.println(Arrays.toString(cResponsePacket));
 
         // Stage D
         byte[] dResponsePacket = stageD(cResponsePacket);
         
         // TODO: Remove later
         System.out.println("Done with stage D");
-        System.out.println(Arrays.toString(dResponsePacket));
     }
 
     // Create the header for the packets
@@ -117,14 +113,9 @@ public class ClientMain {
             // ack packet has been received from the server
             while (ackedPacket == null || ByteBuffer.wrap(ackedPacket).getInt(12) != i) {
                 udp.send(dataPacket);
-                // System.out.println("Packet " + i + " sent");
-                // System.out.println(udp.isConnected());
                 ackedPacket = udp.receive(HEADER_SIZE + 4);
             }
         }
-
-        // TODO: remove this later
-        System.out.println("Here is the secret A: " + secretA);
 
         byte[] response = udp.receive(HEADER_SIZE + 8);
         // Close the UDP socket
@@ -141,9 +132,6 @@ public class ClientMain {
         packetBuf.put(packet);
         // Get the information from the server packet
         int tcpPort = packetBuf.getInt(12);
-        // TODO: print secrets, get rid of this
-        int secretB = packetBuf.getInt(16);
-        System.out.println("Here is secret b: " + secretB);
         // Connect to the TCP port received from
         // the server
         tcp = new TCPConnect(tcpPort);

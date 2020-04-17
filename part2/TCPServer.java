@@ -5,7 +5,6 @@ import java.io.*;
 public class TCPServer {    
     private ServerSocket tcp;
     private Socket socket;
-//    private int port;
 
     public TCPServer(int port)  {
         try {
