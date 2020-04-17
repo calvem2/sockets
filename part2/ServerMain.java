@@ -6,13 +6,17 @@ import java.io.IOException;
 public class ServerMain {
     public static void main (String [] args) {
         UDPServer udp = new UDPServer(ServerUtils.INIT_PORT, false);
+        // Start receiving from clients
         while (true) {
             DatagramPacket dp = udp.receive(ServerUtils.HEADER_SIZE + 12);
+            // If request is valid, start a new thread to handle the rest
+            // of the client's stages
             if (verifyRequestA(dp.getData())) {
                 udp.processRequest(dp);                
-                // Get UDP port to be used in Stage B
+                // Get UDPServer and its port to be used in Stage B
                 UDPServer stageBServer = new UDPServer(0, true);
                 int stageBPort = stageBServer.getLocalPort();
+                // Put UDP port into Stage A response packet
                 byte[] response = ByteBuffer.wrap(stageAResponse()).putInt(20, stageBPort).array();
                 udp.send(response);
                 ServerThread thread = new ServerThread(response, stageBServer); 
@@ -21,18 +25,16 @@ public class ServerMain {
         }
     }
 
-    // Does the server side for stage A
+    // Create response packet for Stage A
     public static byte[] stageAResponse() {
         Random rand = new Random();
-        // Create payload
+        // Create payload: [num, len, udp port, secret]
         ByteBuffer payload = ByteBuffer.allocate(16);
         payload.putInt(rand.nextInt(100) + 1);
         payload.putInt(rand.nextInt(500) + 1);
-        // UDP port number range: [12235, 65535]
-        //payload.putInt(rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT);
         int psecret = rand.nextInt(100) + 1;
         payload.putInt(12, psecret);
-        // Merge payload and header
+        // Merge payload with a packet header
         byte[] header = ServerUtils.createHeader(16, psecret);
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
@@ -56,8 +58,6 @@ public class ServerMain {
                             payloadArr[i] == request.get(i + ServerUtils.HEADER_SIZE);
             i++;
         }
-
-        // Verify packet is padded
         return verifyPayload;
     }
 }

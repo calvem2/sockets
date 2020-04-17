@@ -15,7 +15,6 @@ public class ServerThread extends Thread {
         ByteBuffer response = ByteBuffer.wrap(stageAMessage);
         this.num = response.getInt(12);
         this.len = response.getInt(16);
-        // udp = new UDPServer(response.getInt(20), true);
         udp = server;
         this.secret = response.getInt(24);
     }
@@ -32,6 +31,7 @@ public class ServerThread extends Thread {
             }
             // Stage C
             stageC();
+
             // Stage D
             stageD();
             tcp.close();
@@ -44,7 +44,9 @@ public class ServerThread extends Thread {
         }
     }
 
-    // Does server side stage B
+    // Executes Stage B:
+    // Receive client's Stage B packets, send ACKs, and
+    // send final response after all packets have been received
     public void stageB() throws Exception {
         int ackedPacketID = 0;
         Random rand = new Random();
@@ -55,11 +57,10 @@ public class ServerThread extends Thread {
             int expectedLength = ServerUtils.HEADER_SIZE + len + 4;
             expectedLength += ServerUtils.getPadding(expectedLength);
             DatagramPacket packet = udp.receive(expectedLength);
-            // If the packet took too long to be received
+            // If no packet was received in the allotted time
             if (packet == null) {
                 throw new Exception("Stage B timed out waiting for client");
             }
-            
             verifyStageB(packet.getData(), ackedPacketID);
             udp.processRequest(packet);
             ByteBuffer request = ByteBuffer.wrap(packet.getData());
@@ -81,7 +82,7 @@ public class ServerThread extends Thread {
         udp.send(response);
     }
 
-    // Verify the client packet received from stage B
+    // Verify the client packet received from Stage B
     public void verifyStageB(byte[] packet, int id) throws Exception {
         ByteBuffer request = ByteBuffer.wrap(packet);
         // Verify the packet
@@ -100,7 +101,7 @@ public class ServerThread extends Thread {
         }
     }
 
-    // Create the server packet sent in stage b1
+    // Create the server packet sent in first part of Stage B (ACK packets)
     public byte[] stageB1Response(int ack) {
         ByteBuffer payload = ByteBuffer.allocate(4);
         payload.putInt(ack);
@@ -108,23 +109,25 @@ public class ServerThread extends Thread {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
-    // Create the server packet sent in stage b2
+    // Create the server packet sent in second part of Stage B
     public byte[] stageB2Response() {
         ByteBuffer payload = ByteBuffer.allocate(8);
         Random rand = new Random();
-        // int tcpPort = rand.nextInt((65535 - ServerUtils.MIN_PORT) + 1) + ServerUtils.MIN_PORT;
+        // Generate payload
         int psecret = rand.nextInt(100) + 1;
         tcp = new TCPServer(0);
         payload.putInt(tcp.getLocalPort());
         payload.putInt(psecret);
+        // Merge payload with header
         byte[] header = ServerUtils.createHeader(8, psecret);
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
-    // Does the server side stage C
+    // Executes Stage C
     public void stageC() {
         ByteBuffer payload = ByteBuffer.allocate(13);
         Random rand = new Random();
+        // Generate payload values for response packet
         num = rand.nextInt(100) + 1;
         len = rand.nextInt(500) + 1;
         secret = rand.nextInt(100) + 1;
@@ -140,13 +143,15 @@ public class ServerThread extends Thread {
         tcp.send(response);
     }
 
-    // Does the server side stage D
+    // Executes Stage D:
+    // Receive all packets from client then send final response packet
     public void stageD() throws Exception {
         int received = 0;
         while (received != num) {
             int expectedLength = ServerUtils.HEADER_SIZE + len;
             expectedLength += ServerUtils.getPadding(expectedLength);
             byte[] request = tcp.receive(expectedLength);
+            // If no packet was received in the allotted time
             if (request == null) {
                 throw new Exception("Stage D timed out waiting for client");
             }
@@ -156,10 +161,11 @@ public class ServerThread extends Thread {
         tcp.send(stageDResponse());
     }
 
-    // Verify the packet sent from the client for stage D
+    // Verify packets received from client in Stage D
     public void verifyStageD(byte[] packet) throws Exception {
-        // Verify payload
+        // Verify packet header and length
         ServerUtils.verifyPacket(packet, len, secret);
+        // Verify payload
         int i = 0;
         while (i < len) {
             if (packet[i + ServerUtils.HEADER_SIZE] != c) {
@@ -169,7 +175,7 @@ public class ServerThread extends Thread {
         }
     }
 
-    // Create the server packet for stage D
+    // Create the server packet sent in stage D
     public byte[] stageDResponse() {
         // Create the payload
         ByteBuffer payload = ByteBuffer.allocate(4);

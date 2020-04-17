@@ -6,6 +6,10 @@ public class TCPServer {
     private ServerSocket tcp;
     private Socket socket;
 
+    /*
+     * Creates new TCPServer with tcp socket
+     * bound to the given port with timeout enabled
+     */
     public TCPServer(int port)  {
         try {
             tcp = new ServerSocket(port);
@@ -16,10 +20,17 @@ public class TCPServer {
         }
     }
 
+    /*
+     * return the local port this TCPServer's
+     * tcp socket is bound to
+     */
     public int getLocalPort() {
         return tcp.getLocalPort();
     }
 
+    /*
+     * Accept a connection on the tcp socket.
+     */
     public Socket accept() {
         try {
             socket = tcp.accept();
@@ -33,7 +44,9 @@ public class TCPServer {
         return socket;
     }
 
-    // Send the packet to the server
+    /*
+     * Send given buf from this tcp socket
+     */
     public void send(byte[] buf) {
         try {
             OutputStream os = socket.getOutputStream();
@@ -44,7 +57,9 @@ public class TCPServer {
         }
     }
 
-    // Receive a packet from the server
+    /*
+     * Receive packet of given length on this socket
+     */
     public byte[] receive(int length) {
         byte[] buf = new byte[length];
         try {
@@ -62,7 +77,10 @@ public class TCPServer {
         return buf;
     }
 
-    // Close the socket
+
+    /*
+     * Close the socket
+     */
     public void close() {
         try {
             if (!tcp.isClosed()) {

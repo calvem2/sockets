@@ -7,6 +7,11 @@ public class UDPServer{
     private InetAddress clientAddr;
     private int clientPort;
 
+    /*
+     * Creates new UDPServer with its socket
+     * bound to the given port. If timeout is true,
+     * enable timeout for socket.
+     */
     public UDPServer(int port, boolean timeout) {
         try {
             if (port == 0) {
@@ -25,11 +30,16 @@ public class UDPServer{
         }
     }
 
+    /*
+     * return the local port this UDPServer's socket is bound to
+     */
     public int getLocalPort() {
         return udp.getLocalPort();
     }
 
-    // Send the packet to the server
+    /*
+     * Send given buf from this socket
+     */
     public void send(byte[] buf) {
         try {
             DatagramPacket dp = new DatagramPacket(buf, buf.length, clientAddr, clientPort);
@@ -40,7 +50,9 @@ public class UDPServer{
         }
     }
 
-    // Receive a packet from the server
+    /*
+     * Receive packet of given length on this socket
+     */
     public DatagramPacket receive(int length) {
         byte[] buf = new byte[length];
         DatagramPacket dp = new DatagramPacket(buf, buf.length);
@@ -57,13 +69,19 @@ public class UDPServer{
         return dp;
     }
 
-    // Process request recieved from client
+    /*
+     * Set this UDPServer's client address and port
+     * using info from recently received DatagramPacket request.
+     * Call after receiving and before sending from this socket
+     */
     public void processRequest(DatagramPacket request) {
         clientAddr = request.getAddress();
         clientPort = request.getPort();
     }
 
-    // Close the socket
+    /*
+     * Close the socket
+     */
     public void close() {
         if (!udp.isClosed()) {
             udp.close();
