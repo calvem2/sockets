@@ -35,7 +35,9 @@ public class UDPConnect {
         }
     }
 
-    // Send the packet to the server
+    /* 
+     * Send the packet to the server
+     */
     public void send(byte[] buf) {
         try {
             InetAddress addr = InetAddress.getByName(server);
@@ -50,7 +52,9 @@ public class UDPConnect {
         }
     }
 
-    // Receive a packet from the server
+    /* 
+     * Receive a packet from the server
+     */
     public byte[] receive(int length) {
         byte[] buf = new byte[length];
         DatagramPacket dp = new DatagramPacket(buf, buf.length);
@@ -67,7 +71,9 @@ public class UDPConnect {
         return buf;
     }
 
-    // Close the socket
+    /* 
+     * Close the socket
+     */
     public void close() {
         udp.close();
     }

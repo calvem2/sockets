@@ -7,8 +7,10 @@ public class ServerUtils {
     public static final int HEADER_SIZE = 12;
     public static final int TIMEOUT = 3000;
 
-    // Create the header for the packets
-    // [len, secret, step, student id]
+    /*
+     * Create the header for the packets
+     * [len, secret, step, student id]
+     */
     public static byte[] createHeader(int payloadLen, int pSecret) {
         ByteBuffer byteBuf = ByteBuffer.allocate(HEADER_SIZE);
         byteBuf.putInt(payloadLen);
@@ -19,7 +21,9 @@ public class ServerUtils {
         return byteBuf.array();
     }
 
-    // Return byte array containing header merged with the payload
+    /*
+     * Return byte array containing header merged with the payload
+     */
     public static byte[] mergeHeaderPayload(byte[] header, byte[] payload) {
         // Get the amount of padding needed
         int padding = getPadding(header.length + payload.length);
@@ -31,7 +35,9 @@ public class ServerUtils {
         return mergedBuf.array();
     }
 
-    // Return the amount of padding needed for given length
+    /*
+     * Return the amount of padding needed for given length
+     */
     public static int getPadding(int len) {
         int padding = 0;
         if (len % 4 != 0) {
@@ -40,8 +46,10 @@ public class ServerUtils {
         return padding;
     }
 
-    // Verify the packet received from the client is 4-byte aligned and has
-    // a header with the correct values
+    /* 
+     * Verify the packet received from the client is 4-byte aligned and has
+     * a header with the correct values
+     */
     public static void verifyPacket(byte[] packet, int len, int secret) throws Exception {
         ByteBuffer request = ByteBuffer.wrap(packet);
         int padding = getPadding(HEADER_SIZE + len);

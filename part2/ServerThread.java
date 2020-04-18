@@ -44,9 +44,11 @@ public class ServerThread extends Thread {
         }
     }
 
-    // Executes Stage B:
-    // Receive client's Stage B packets, send ACKs, and
-    // send final response after all packets have been received
+    /*
+     * Executes Stage B:
+     * Receive client's Stage B packets, send ACKs, and
+     * send final response after all packets have been received
+     */
     public void stageB() throws Exception {
         int ackedPacketID = 0;
         Random rand = new Random();
@@ -82,7 +84,9 @@ public class ServerThread extends Thread {
         udp.send(response);
     }
 
-    // Verify the client packet received from Stage B
+    /*
+     * Verify the client packet received from Stage B
+     */
     public void verifyStageB(byte[] packet, int id) throws Exception {
         ByteBuffer request = ByteBuffer.wrap(packet);
         // Verify the packet
@@ -101,7 +105,9 @@ public class ServerThread extends Thread {
         }
     }
 
-    // Create the server packet sent in first part of Stage B (ACK packets)
+    /*
+     * Create the server packet sent in first part of Stage B (ACK packets)
+     */
     public byte[] stageB1Response(int ack) {
         ByteBuffer payload = ByteBuffer.allocate(4);
         payload.putInt(ack);
@@ -109,7 +115,9 @@ public class ServerThread extends Thread {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
-    // Create the server packet sent in second part of Stage B
+    /*
+     * Create the server packet sent in second part of Stage B
+     */
     public byte[] stageB2Response() {
         ByteBuffer payload = ByteBuffer.allocate(8);
         Random rand = new Random();
@@ -123,7 +131,9 @@ public class ServerThread extends Thread {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
-    // Executes Stage C
+    /*
+     * Executes Stage C
+     */
     public void stageC() {
         ByteBuffer payload = ByteBuffer.allocate(13);
         Random rand = new Random();
@@ -143,8 +153,10 @@ public class ServerThread extends Thread {
         tcp.send(response);
     }
 
-    // Executes Stage D:
-    // Receive all packets from client then send final response packet
+    /*
+     * Executes Stage D:
+     * Receive all packets from client then send final response packet
+     */
     public void stageD() throws Exception {
         int received = 0;
         while (received != num) {
@@ -161,7 +173,9 @@ public class ServerThread extends Thread {
         tcp.send(stageDResponse());
     }
 
-    // Verify packets received from client in Stage D
+    /*
+     * Verify packets received from client in Stage D
+     */
     public void verifyStageD(byte[] packet) throws Exception {
         // Verify packet header and length
         ServerUtils.verifyPacket(packet, len, secret);
@@ -175,7 +189,9 @@ public class ServerThread extends Thread {
         }
     }
 
-    // Create the server packet sent in stage D
+    /*
+     * Create the server packet sent in stage D
+     */
     public byte[] stageDResponse() {
         // Create the payload
         ByteBuffer payload = ByteBuffer.allocate(4);

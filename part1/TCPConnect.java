@@ -21,7 +21,9 @@ public class TCPConnect {
         }
     }
 
-    // Send the packet to the server
+    /* 
+     * Send the packet to the server
+     */
     public void send(byte[] buf) {
         try {
             OutputStream os = tcp.getOutputStream();
@@ -32,7 +34,9 @@ public class TCPConnect {
         }
     }
 
-    // Receive a packet from the server
+    /* 
+     * Receive a packet from the server
+     */
     public byte[] receive(int length) {
         byte[] buf = new byte[length];
         try {
@@ -48,7 +52,9 @@ public class TCPConnect {
         return buf;
     }
 
-    // Close the socket
+    /*
+     * Close the socket
+     */
     public void close() {
         try {
             tcp.close();

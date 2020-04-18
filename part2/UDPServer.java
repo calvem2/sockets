@@ -32,7 +32,7 @@ public class UDPServer{
     }
 
     /*
-     * return the local port this UDPServer's socket is bound to
+     * Return the local port this UDPServer's socket is bound to
      */
     public int getLocalPort() {
         return udp.getLocalPort();

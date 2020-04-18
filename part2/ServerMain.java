@@ -25,7 +25,9 @@ public class ServerMain {
         }
     }
 
-    // Create response packet for Stage A
+    /*
+     * Create response packet for Stage A
+     */
     public static byte[] stageAResponse() {
         Random rand = new Random();
         // Create payload: [num, len, udp port, secret]
@@ -39,7 +41,9 @@ public class ServerMain {
         return ServerUtils.mergeHeaderPayload(header, payload.array());
     }
 
-    // Verify the client request for stage A
+    /*
+     * Verify the client request for stage A
+     */
     public static boolean verifyRequestA(byte[] packet) {
         ByteBuffer request = ByteBuffer.wrap(packet);
         String payload = "hello world\0";

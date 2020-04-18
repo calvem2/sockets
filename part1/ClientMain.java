@@ -70,7 +70,9 @@ public class ClientMain {
         System.out.println("Done with stage D");
     }
 
-    // Create the header for the packets
+    /*
+     * Create the header for the packets
+     */
     public static byte[] createHeader(int payloadLen, int pSecret) {
         ByteBuffer byteBuf = ByteBuffer.allocate(HEADER_SIZE);
         byteBuf.putInt(payloadLen);
@@ -81,8 +83,10 @@ public class ClientMain {
         return byteBuf.array();
     }
 
-    // Merge the header and the payload
-    // Return the array of bytes with the header and payload merged together
+    /*
+     * Merge the header and the payload
+     * Return the array of bytes with the header and payload merged together
+     */
     public static byte[] mergeHeaderPayload(byte[] header, byte[] payload) {
         int padding = 0;
         // If the packet needs to be padded
@@ -97,7 +101,9 @@ public class ClientMain {
         return mergedBuf.array();
     }
 
-    // Does the client side stage A
+    /*
+     * Does the client side stage A
+     */
     public static byte[] stageA() {
         UDPConnect udp = new UDPConnect(PORT, serverName);
         // Create the payload, header, and packet
@@ -115,7 +121,9 @@ public class ClientMain {
         return response;
     }
 
-    // Does the client side stage B
+    /* 
+     * Does the client side stage B
+     */
     public static byte[] stageB(byte[] packet) {
         // Creates the byte buffer from the packet received
         // from the server from stage A
@@ -157,7 +165,9 @@ public class ClientMain {
         return response;
     }
 
-    // Does the client side stage C
+    /*
+     * Does the client side stage C
+     */
     public static byte[] stageC(byte[] packet) {
         // Creates a byte buffer from the packet received
         // from the server in stage B
@@ -174,7 +184,9 @@ public class ClientMain {
         return response;
     }
 
-    // Does the client side stage D
+    /* 
+     * Does the client side stage D
+     */
     public static byte[] stageD(byte[] packet) {
         // Creates a byte buffer from the packet received
         // from the server in stage C

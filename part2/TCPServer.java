@@ -22,7 +22,7 @@ public class TCPServer {
     }
 
     /*
-     * return the local port this TCPServer's
+     * Return the local port this TCPServer's
      * tcp socket is bound to
      */
     public int getLocalPort() {
