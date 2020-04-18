@@ -55,8 +55,7 @@ public class ClientMain {
         System.out.println("num2: " + cBuf.getInt(12));
         System.out.println("len2: " + cBuf.getInt(16));
         System.out.println("secretC: " + cBuf.getInt(20));
-        // TODO: Might need to change this later
-        System.out.println("tcp_port: " + cBuf.get(24));
+        System.out.println("c: " + (char)cBuf.get(24));
         System.out.println("Done with stage C\n");
 
         // Stage D
