@@ -2,15 +2,13 @@ import java.nio.*;
 import java.net.*;
 import java.io.*;
 
-public class TCPConnect {
-    private static final String SERVER = "attu7.cs.washington.edu";
-    
+public class TCPConnect {    
     private Socket tcp;
     private int port;
 
-    public TCPConnect(int port) {
+    public TCPConnect(int port, String server) {
         try {
-            tcp = new Socket(SERVER, port);
+            tcp = new Socket(server, port);
             this.port = port;
         } catch (UnknownHostException e) {
             System.out.println("Error: Could not find host");

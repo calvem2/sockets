@@ -10,8 +10,16 @@ public class ClientMain {
     public static final short SID_NUM = 947;
 
     public static TCPConnect tcp;
+    public static String serverName;
     
     public static void main (String[] args) {
+        // Set server address to command ling arg
+        if (args.length != 1) {
+            System.out.println("Usage: java ClientMain <server name>");
+            System.exit(0);
+        }
+        serverName = "attu" + args[0] + ".cs.washington.edu";
+
         // Stage A
         byte[] aResponsePacket = stageA();
         System.out.println("Stage A Response:");
@@ -90,7 +98,7 @@ public class ClientMain {
 
     // Does the client side stage A
     public static byte[] stageA() {
-        UDPConnect udp = new UDPConnect(PORT);
+        UDPConnect udp = new UDPConnect(PORT, serverName);
         // Create the payload, header, and packet
         String str = "hello world\0";
         byte[] payload = str.getBytes();       
@@ -119,7 +127,7 @@ public class ClientMain {
         int udp_port = packetBuf.getInt(20);
         int secretA = packetBuf.getInt(24);
         // Create a new udp connection
-        UDPConnect udp = new UDPConnect(udp_port, 500);
+        UDPConnect udp = new UDPConnect(udp_port, serverName, 500);
         // Create the header for the packets
         byte[] header = createHeader(length + 4, secretA);
 
@@ -158,7 +166,7 @@ public class ClientMain {
         int tcpPort = packetBuf.getInt(12);
         // Connect to the TCP port received from
         // the server
-        tcp = new TCPConnect(tcpPort);
+        tcp = new TCPConnect(tcpPort, serverName);
         // Receive the packet from the server
         byte[] response = tcp.receive(HEADER_SIZE + 16);
 

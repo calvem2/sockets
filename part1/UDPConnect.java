@@ -2,22 +2,22 @@ import java.nio.*;
 import java.net.*;
 import java.io.IOException;
 
-public class UDPConnect {
-    private static final String SERVER = "attu7.cs.washington.edu";
-    
+public class UDPConnect {    
     private DatagramSocket udp;
     private int port;
+    private String server;
 
-    public UDPConnect(int port) {
-        this(port, 0);
+    public UDPConnect(int port, String serverName) {
+        this(port, serverName, 0);
     }
 
-    public UDPConnect(int port, int timeout) {
+    public UDPConnect(int port, String serverName, int timeout) {
         try {
             udp = new DatagramSocket();
             this.port = port;
+            this.server = serverName;
             // Connect to the server
-            InetAddress addr = InetAddress.getByName(SERVER);
+            InetAddress addr = InetAddress.getByName(server);
             udp.connect(addr, port);
 
             // Enable timeout
@@ -33,15 +33,10 @@ public class UDPConnect {
         }
     }
 
-    // TODO: delete??
-    public boolean isConnected() {
-        return udp.isConnected();
-    }
-
     // Send the packet to the server
     public void send(byte[] buf) {
         try {
-            InetAddress addr = InetAddress.getByName(SERVER);
+            InetAddress addr = InetAddress.getByName(server);
             DatagramPacket dp = new DatagramPacket(buf, buf.length, addr, port);
             udp.send(dp);
         } catch (UnknownHostException e) {
