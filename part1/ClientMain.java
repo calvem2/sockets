@@ -18,7 +18,8 @@ public class ClientMain {
             System.out.println("Usage: java ClientMain <server name>");
             System.exit(0);
         }
-        serverName = "attu" + args[0] + ".cs.washington.edu";
+        // Get the server name from the user input
+        serverName = args[0];
 
         // Stage A
         byte[] aResponsePacket = stageA();
