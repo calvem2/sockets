@@ -12,3 +12,6 @@ host you would like to connect to):
 
 javac ClientMain.java
 java ClientMain hostName
+
+Example of how to run:
+java ClientMain attu2.cs.washington.edu
