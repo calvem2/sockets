@@ -17,6 +17,7 @@ public class TCPServer {
         } catch (IOException e) {
             System.out.println("Error: Could not open socket");
             e.printStackTrace();
+            System.exit(0);
         }
     }
 

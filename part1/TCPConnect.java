@@ -13,9 +13,11 @@ public class TCPConnect {
         } catch (UnknownHostException e) {
             System.out.println("Error: Could not find host");
             e.printStackTrace();
+            System.exit(0);
         } catch (IOException e) {
             System.out.println("Error: Could not create socket");
             e.printStackTrace();
+            System.exit(0);
         }
     }
 

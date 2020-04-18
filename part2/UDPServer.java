@@ -27,6 +27,7 @@ public class UDPServer{
         } catch (SocketException e) {
             System.out.println("Error: Could not open open UDP socket");
             e.printStackTrace();
+            System.exit(0);
         }
     }
 
