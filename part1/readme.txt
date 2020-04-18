@@ -7,6 +7,8 @@ Secret B: 47
 Secret C: 247
 Secret D: 4
 
-How to compile our code:
+How to compile our code (hostName is the name of the 
+host you would like to connect to):
+
 javac ClientMain.java
-java ClientMain
+java ClientMain hostName
